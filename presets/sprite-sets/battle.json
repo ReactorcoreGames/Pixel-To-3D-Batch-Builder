@@ -1,0 +1,18 @@
+{
+  "order": 32,
+  "id": "battle",
+  "name": "Battle view",
+  "file": "battle",
+  "sub": "1 picture · perspective",
+  "dirs": 1,
+  "start": "custom",
+  "yaw": 20,
+  "ref": "drawing",
+  "elev": 20,
+  "cam": "persp",
+  "fov": 40,
+  "cell": 256,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "One big picture of your drawing turned 20° and seen from 20° up through a real camera lens, like the battle scenes of Advance Wars. 256 px by default; any picture size works, from 32 px up to 1024 px."
+}

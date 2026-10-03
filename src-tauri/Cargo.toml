@@ -1,0 +1,30 @@
+[package]
+name = "pixel-to-3d-batch-builder"
+version = "1.0.0"
+description = "Pixel to 3D Batch Builder"
+authors = ["Reactorcore"]
+edition = "2021"
+rust-version = "1.90"
+
+[lib]
+name = "pixel_to_3d_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+notify = "8"
+
+[profile.release]
+# a small exe: the app is a web page plus a few file commands
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Logo lockup</title>
+<!-- Source for logo-lockup*.png. Open with ?dark for the dark-background version.
+     Rendered at 1200×300 from the top-left corner of the page. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@900&family=Pixelify+Sans:wght@700&display=swap">
+<style>
+  html, body { margin: 0; background: transparent; }
+  body.dark { background: #171327; }
+  #lock {
+    width: 1200px; height: 300px; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center; gap: 44px;
+  }
+  #lock img { width: 208px; height: 208px; image-rendering: pixelated; }
+  .t { font: 700 124px/1 "Pixelify Sans", sans-serif; color: #f5f0ff; letter-spacing: .01em; }
+  .t .a { color: #ff9a3c; } .t .b { color: #8fdc4a; }
+  .s { font: 900 40px/1 Nunito, sans-serif; color: #b9aee0; letter-spacing: .2em; margin-top: 14px; padding-left: 6px; }
+  /* transparent version: a chunky dark pixel outline so the text reads on any background */
+  body:not(.dark) .t, body:not(.dark) .s {
+    text-shadow:
+      -6px 0 #171327, 6px 0 #171327, 0 -6px #171327, 0 6px #171327,
+      -6px -6px #171327, 6px -6px #171327, -6px 6px #171327, 6px 6px #171327,
+      0 12px 0 rgba(23, 19, 39, .55);
+  }
+  body:not(.dark) .s { color: #d9d0ff; }
+</style>
+</head>
+<body>
+<div id="lock">
+  <img id="mark" src="icon.svg" alt="">
+  <div>
+    <div class="t"><span class="a">Pixel</span> to <span class="b">3D</span></div>
+    <div class="s">BATCH BUILDER</div>
+  </div>
+</div>
+<script>
+  if (location.search.includes('dark')) { document.body.classList.add('dark'); document.getElementById('mark').src = 'logo-mark.svg'; }
+</script>
+</body>
+</html>

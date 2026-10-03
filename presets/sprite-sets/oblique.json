@@ -1,0 +1,19 @@
+{
+  "order": 34,
+  "id": "oblique",
+  "name": "Oblique view",
+  "file": "oblique",
+  "sub": "1 picture · flat side + top",
+  "dirs": 1,
+  "start": "front",
+  "ref": "drawing",
+  "elev": 0,
+  "cam": "oblique",
+  "oangle": 45,
+  "odepth": 50,
+  "oside": "right",
+  "cell": 256,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "Your drawing kept flat-on, with the top and the right end showing as the depth slants up and to the right, as hand-drawn Advance Wars battle sprites do. Level lines stay level and the slants are clean 1:1 pixel steps. 256 px by default; any picture size works."
+}

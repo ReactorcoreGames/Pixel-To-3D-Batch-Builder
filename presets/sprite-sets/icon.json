@@ -1,0 +1,17 @@
+{
+  "order": 40,
+  "id": "icon",
+  "name": "Inventory icon",
+  "file": "icon",
+  "sub": "1 picture · turned 35°",
+  "dirs": 1,
+  "start": "custom",
+  "yaw": 35,
+  "ref": "drawing",
+  "elev": 30,
+  "cam": "ortho",
+  "cell": 32,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "A single picture from above, turned a little to the side — like inventory icons, pickups and shop items. Pick your own turn with the \"Custom angle\" slider."
+}

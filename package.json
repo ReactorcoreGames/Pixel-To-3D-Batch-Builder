@@ -1,0 +1,35 @@
+{
+  "name": "pixel-to-3d-batch-builder",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests && tsc --noEmit -p src/cli",
+    "test": "vitest run",
+    "cli:build": "vite build --config vite.cli.config.ts",
+    "cli": "node cli/p3d.mjs",
+    "tauri": "tauri",
+    "desktop": "tauri dev",
+    "desktop:build": "tauri build --no-bundle",
+    "desktop:installer": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.1",
+    "@types/node": "^26.6.3",
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.1",
+    "@tauri-apps/plugin-dialog": "^2.8.1",
+    "@tauri-apps/plugin-opener": "^2.7.0",
+    "fflate": "^0.8.3",
+    "manifold-3d": "^3.5.4",
+    "three": "^0.186.1"
+  }
+}

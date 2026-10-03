@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model preview in Godot</title>
+<style>
+  @font-face { font-family: "Nunito"; font-weight: 200 1000; src: url(fonts/nunito-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Pixelify Sans"; font-weight: 400 700; src: url(fonts/pixelify-sans-latin.woff2) format("woff2"); }
+
+  /* "Cartridge Night", the app's colour scheme */
+  :root {
+    --bg: #171327; --bg-dot: #221c3a; --panel: #262043; --panel-2: #2e2750; --panel-3: #3b3163; --field: #1c1733; --line: #4a3f78;
+    --text: #f5f0ff; --dim: #b9aee0; --faint: #8a7fb5;
+    --m1: #ff9a3c; --m2: #8fdc4a; --sun: #ffd23f; --sel: #7c6cff; --sky: #4db8ff; --ok: #52e3a4; --warn: #ffb020; --err: #ff4d6d; --cream: #fffbe8;
+    --pixel: "Pixelify Sans", "Nunito", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--text); font: 600 16px/1.6 "Nunito", "Segoe UI", system-ui, sans-serif;
+    background-color: var(--bg); background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px); background-size: 18px 18px;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1, h2, h3 { font-family: var(--pixel); font-weight: 600; line-height: 1.2; margin: 0; }
+  h1 { font-size: clamp(30px, 6vw, 44px); }
+  h2 { font-size: 26px; margin: 48px 0 14px; }
+  h3 { font-size: 19px; margin: 0 0 6px; }
+  p { margin: 0 0 12px; }
+  a { color: var(--sky); }
+  b { font-weight: 800; }
+  small, .dim { color: var(--dim); }
+  kbd { font: 800 13px "Nunito", sans-serif; background: var(--panel-3); border-radius: 6px; padding: 1px 7px; box-shadow: 0 2px 0 #0f0c1c; white-space: nowrap; }
+  code { font-size: 14px; background: var(--field); border-radius: 6px; padding: 1px 6px; overflow-wrap: anywhere; }
+  img { display: block; max-width: 100%; height: auto; border-radius: 12px; image-rendering: pixelated; }
+
+  header { display: flex; gap: 18px; align-items: center; margin-bottom: 18px; }
+  header .logo { width: 64px; height: 64px; flex: none; image-rendering: pixelated; border-radius: 0; }
+  .lead { font-size: 18px; color: var(--dim); max-width: 720px; }
+  .card { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .shot { margin: 18px 0 8px; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .shot img { border-radius: 0; }
+  .caption { color: var(--dim); font-size: 14px; margin: 0 0 12px; }
+
+  .need { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .need .card { padding: 14px 16px; }
+  .need .card p { margin: 0; }
+
+  ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 14px; }
+  ol.steps > li { counter-increment: step; position: relative; padding: 16px 18px 16px 70px; background: var(--panel); border: 2px solid var(--line); border-radius: 16px; }
+  ol.steps > li::before {
+    content: counter(step); position: absolute; left: 16px; top: 14px; width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; font: 700 20px var(--pixel); color: #171327; background: var(--m2);
+  }
+  ol.steps > li p:last-child { margin-bottom: 0; }
+
+  /* little stand-ins for Godot's own buttons */
+  .gd { display: inline-flex; gap: 4px; align-items: center; vertical-align: middle; background: #21262e; border-radius: 6px; padding: 3px; margin: 2px 0; }
+  .gd span { font: 600 13px "Segoe UI", system-ui, sans-serif; color: #e0e0e0; background: #363d4a; border-radius: 4px; padding: 3px 10px; }
+  .gd span.hot { background: #478cbf; color: #fff; outline: 2px solid var(--sun); outline-offset: 1px; }
+
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .ways .card h3 { color: var(--m2); }
+
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 7px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+  tr:first-child td { border-top: 0; }
+  td:first-child { width: 42%; }
+
+  .switch { display: grid; gap: 6px; margin-bottom: 26px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg); }
+  .pair img { grid-column: 1 / 3; width: 100%; border-radius: 0; }
+  .pair span { font: 800 12px "Nunito", sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); padding: 6px 12px; background: var(--panel-2); }
+  .pair span + span { border-left: 2px solid var(--line); }
+
+  .lights { border: 2px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .lights img { border-radius: 0; }
+  .lights div { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--panel-2); }
+  .lights div span { font: 800 12px "Nunito", sans-serif; text-align: center; padding: 6px 4px; color: var(--dim); }
+
+  .tip { border-left: 5px solid var(--sky); }
+  .warn { border-left: 5px solid var(--warn); }
+  .stack { display: grid; gap: 12px; }
+  footer { margin-top: 48px; color: var(--faint); font-size: 14px; }
+  @media (max-width: 560px) {
+    ol.steps > li { padding: 60px 14px 14px; }
+    td:first-child { width: auto; }
+    .lights div span { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <img class="logo" src="icon.svg" alt="">
+  <div>
+    <h1>See your models in Godot</h1>
+    <p class="dim" style="margin:0">Pixel to 3D Batch Builder · model preview</p>
+  </div>
+</header>
+<p class="lead">This folder is a small Godot project that shows the models you export from Pixel to 3D under real game-engine lighting, with a switch for every bit of surface detail. You don't need to know Godot: download it, open this folder, press Play. It takes about five minutes the first time.</p>
+
+<div class="shot"><img src="guide/viewer.png" alt="The preview window: a list of models on the left, a 3D chest in the middle, switches for surface detail, light and camera on the right" width="1280" height="760"></div>
+<p class="caption">The preview window. It starts with nine sample models, so you can try it before exporting anything.</p>
+
+<h2>What you need</h2>
+<div class="need">
+  <div class="card"><h3>Godot 4.7 or newer</h3><p>Free. No installer: it's a single program in a zip. Take the standard version, not the ".NET" one.</p></div>
+  <div class="card"><h3>This folder</h3><p><code>godot-preview</code>, the folder this guide is in. Keep it somewhere you can find it; Godot will remember it.</p></div>
+  <div class="card"><h3>Some exported models</h3><p>Optional at first. In the app, go to ② and run it with <b>3D model</b> ticked. You get <code>.glb</code> files (or a zip of them).</p></div>
+</div>
+
+<h2>The first time: from download to models</h2>
+<ol class="steps">
+  <li>
+    <h3>Download Godot</h3>
+    <p>Go to <a href="https://godotengine.org/download/windows/">godotengine.org/download/windows</a> and click the big download button for <b>Godot Engine</b> (not the one that says .NET).</p>
+  </li>
+  <li>
+    <h3>Unzip it and start it</h3>
+    <p>Right-click the downloaded zip, pick <b>Extract All…</b>, and open the new folder. Double-click the program called <code>Godot_v4.7…_win64.exe</code>. If there's also a <code>…_console.exe</code>, ignore that one; it only adds a text window.</p>
+    <p class="dim">Tip: move the extracted folder somewhere permanent (like Documents) and pin Godot to the taskbar, so it's easy to start next time.</p>
+  </li>
+  <li>
+    <h3>Import this project</h3>
+    <p>Godot opens its <b>Project Manager</b>, a list of projects (empty the first time). Click <span class="gd"><span class="hot">Import</span></span>, then find this folder and pick the file <code>project.godot</code> in it. Confirm with the <span class="gd"><span class="hot">Import</span></span> button at the bottom of that window.</p>
+    <p class="dim">Even quicker: drag the <code>godot-preview</code> folder (or its <code>project.godot</code>) from File Explorer onto the Project Manager window.</p>
+  </li>
+  <li>
+    <h3>Wait a moment while Godot opens it</h3>
+    <p>The Godot editor opens. The first time, it spends a few seconds preparing the project's files (a progress bar), then shows a mostly empty 3D scene. That's fine: the viewer builds everything when it runs.</p>
+  </li>
+  <li>
+    <h3>Press Play</h3>
+    <p>At the top right of the editor, click the play arrow, <span class="gd"><span class="hot">▶</span><span>⏸</span><span>■</span></span>, or press <kbd>F5</kbd>. The preview opens in its own window with the sample models.</p>
+  </li>
+  <li>
+    <h3>Load your own models</h3>
+    <p>Drag your exported models onto the preview window. That's it. The next section has the other ways.</p>
+  </li>
+</ol>
+
+<div class="card tip" style="margin-top:14px">
+  <p><b>Next time</b> it's quicker: start Godot, double-click <b>Pixel to 3D model preview</b> in the Project Manager, and press <kbd>F5</kbd>. (Or select it and click <span class="gd"><span>Run</span></span> in the Project Manager to skip the editor.) The preview remembers the folder you loaded last and all your switches.</p>
+</div>
+
+<h2>Three ways to load your models</h2>
+<p>The preview loads a whole batch at once, including sub-folders, so it works with "One folder per model" on or off. Nothing needs importing, and nothing is copied or changed.</p>
+<div class="ways">
+  <div class="card"><h3>Drop them on the window</h3><p>Drag a folder, the zip the app downloads, or some <code>.glb</code> files from File Explorer onto the preview window.</p></div>
+  <div class="card"><h3>Open folder…</h3><p>The green button at the top left opens the normal Windows folder picker. Pick the folder you exported to.</p></div>
+  <div class="card"><h3>The models folder</h3><p>Put your models in <code>godot-preview/models</code>. If it has models in it, the preview always starts with them.</p></div>
+</div>
+<p style="margin-top:12px">Exported new versions? Press <b>Reload</b> (or <kbd>R</kbd>) to load the same folder again.</p>
+
+<div class="shot"><img src="guide/grid.png" alt="All nine sample models standing side by side on the floor" width="1280" height="760"></div>
+<p class="caption"><b>All side by side</b> (<kbd>G</kbd>) puts every model on the floor at once, at its real size. Point at one to see its name, click it to look at it on its own.</p>
+
+<h2>Moving around</h2>
+<div class="card">
+  <table>
+    <tr><td>Drag with the left mouse button</td><td>Turn the camera around the model</td></tr>
+    <tr><td>Drag with the right (or middle) button</td><td>Move the camera sideways</td></tr>
+    <tr><td>Mouse wheel</td><td>Zoom in and out</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>→</kbd>, or click the list</td><td>Previous and next model</td></tr>
+    <tr><td><kbd>G</kbd></td><td>One model ↔ all side by side</td></tr>
+    <tr><td><kbd>Space</kbd></td><td>Turntable: spins the models under the lights</td></tr>
+    <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></td><td>Sun, Studio, Shade, Moving lamp</td></tr>
+    <tr><td><kbd>F</kbd></td><td>Reset the view</td></tr>
+    <tr><td><kbd>R</kbd></td><td>Reload the models</td></tr>
+  </table>
+</div>
+<p class="dim" style="margin-top:10px">Hover over any switch in the preview for a short explanation. The panel at the bottom says what the shown file actually holds (✓ or ✗ for each map), so you can tell a file without crevice shadows from a switch that's off.</p>
+
+<h2>The switches</h2>
+<p>These match the surface detail settings in the app's <b>3D model</b> export card. Turning one off here doesn't change your files; it only lets you compare.</p>
+
+<div class="switch">
+  <h3>Bumpy surface (normal map)</h3>
+  <p>The carved and embossed look from your chosen bump style. It shows best when light skims across the surface: try the <b>Moving lamp</b> or the turntable.</p>
+  <div class="pair"><img src="guide/bumpy.png" alt="A wooden crate lit by a lamp from the side: with the normal map its planks and brace have lit edges, without it they are flat" width="930" height="408"><span>On</span><span>Off</span></div>
+</div>
+
+<div class="switch">
+  <h3>Crevice shadows (AO map)</h3>
+  <p>Only for files exported with crevice shadows <b>In the file (AO map)</b>. Godot uses this map to darken light from the sky and surroundings, not light from the sun or lamps, so it shows most in <b>Shade</b> and very little in bright sun. Shadows <b>Painted into the texture</b> are part of the colours instead and always show.</p>
+  <div class="pair"><img src="guide/crevice.png" alt="A stone boulder in soft sky light: with the AO map its cracks are darker" width="930" height="408"><span>On (Shade light)</span><span>Off</span></div>
+  <p style="margin-top:8px"><b>AO on light</b> is Godot's own material setting for how much the crevice shadows also darken sun and lamp light. Godot sets it to 0 for every model you import, so 0 is what your game shows unless you change it on the material. Slide it to 1 to see the difference:</p>
+  <div class="pair"><img src="guide/ao-on-light.png" alt="The boulder in sunlight with AO on light at 0 and at 1: at 1 the cracks are darker" width="930" height="408"><span>AO on light 0 (Godot's default)</span><span>AO on light 1</span></div>
+</div>
+
+<div class="switch">
+  <h3>Shiny trims</h3>
+  <p>Makes the light trim pixels glossy (or metal), on top of the model's own Metal and Rough. Off, the whole model uses its own values. Look for the sharp highlights on the hoops:</p>
+  <div class="pair"><img src="guide/trims.png" alt="A blue metal barrel in the sun: with shiny trims its hoops have bright highlights" width="930" height="408"><span>On</span><span>Off</span></div>
+</div>
+
+<div class="switch">
+  <h3>Colour only and the four lights</h3>
+  <p><b>Colour only</b> switches off all light and shading and shows just the texture. The lights: <b>Sun</b> is daylight from the upper left with a blue sky. <b>Studio</b> is three lamps in a dark room. <b>Shade</b> has no sun at all, only soft sky light (the place to judge crevice shadows). <b>Moving lamp</b> is a warm light circling the model in the dark, the best way to see the bumps.</p>
+  <div class="lights"><img src="guide/lights.png" alt="The chest under Sun, Studio, Shade, Moving lamp and Colour only" width="1232" height="240"><div><span>Sun</span><span>Studio</span><span>Shade</span><span>Moving lamp</span><span>Colour only</span></div></div>
+</div>
+
+<h2>Using the models in your own Godot game</h2>
+<div class="stack">
+  <div class="card tip"><p><b>Just drag the <code>.glb</code> files into Godot's FileSystem panel.</b> Godot imports them with the crisp pixel look and every map already hooked up.</p></div>
+  <div class="card tip"><p><b>Crevice shadows under a bright sun</b> need a higher <b>AO on light</b> on the material, as shown above. In Godot it's under the material's <b>Ambient Occlusion</b> section, called "Light Affect". Or export with crevice shadows <b>Painted into the texture</b>, which always shows.</p></div>
+  <div class="card warn">
+    <p><b>Thin light lines along the pixels of shiny, bumpy models?</b> That's Godot's <b>Screen Space Roughness Limiter</b>, which is on by default. It roughens the surface wherever the normal map changes sharply, and pixel-art normal maps change sharply at every pixel edge. Switch it off in <b>Project → Project Settings → Rendering → Anti Aliasing</b> (turn on "Advanced Settings" at the top right to see it). This preview has it off.</p>
+    <div class="pair" style="margin-top:10px"><img src="guide/roughness-limiter.png" alt="A shiny padlock close up: with the limiter on, dotted light lines run along its pixel edges; with it off they are gone" width="930" height="408"><span>Limiter on (Godot's default)</span><span>Limiter off</span></div>
+  </div>
+  <div class="card tip"><p><b>Metal looks dark?</b> Metal shows its colour by reflecting its surroundings. Under a sky (the Sun setup) it reads well; in a dark room with nothing to reflect it goes nearly black. That's real, not a fault in the file. Give your scene a sky or reflection probes, or use Dull metal / a lower Metal value.</p></div>
+</div>
+
+<h2>If something goes wrong</h2>
+<div class="card">
+  <table>
+    <tr><td>Godot says the project is for a newer version</td><td>Download Godot 4.7 or newer (step 1).</td></tr>
+    <tr><td>The window stays black or Godot closes straight away</td><td>Your graphics card may be too old for Godot's standard renderer. In the editor, click <b>Forward+</b> at the top right and switch to <b>Compatibility</b>, then press <kbd>F5</kbd> again. Updating your graphics driver also often helps.</td></tr>
+    <tr><td>"No models found"</td><td>That folder has no <code>.glb</code> files or zips in it (or in its sub-folders). Check that <b>3D model</b> was ticked when you ran ② in the app.</td></tr>
+    <tr><td>A model is red in the list</td><td>Godot couldn't read that file. Export it again; the bottom panel says what went wrong.</td></tr>
+    <tr><td>I still see the old version of a model</td><td>Press <b>Reload</b> after exporting.</td></tr>
+  </table>
+</div>
+
+<footer>Pixel to 3D Batch Builder · made by Reactorcore. Godot is free and open source, from <a href="https://godotengine.org/">godotengine.org</a>. Fonts: Pixelify Sans and Nunito (SIL Open Font License, see <code>fonts/</code>).</footer>
+
+</main>
+</body>
+</html>

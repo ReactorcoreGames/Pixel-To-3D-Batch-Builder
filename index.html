@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pixel to 3D Batch Builder</title>
+<meta name="viewport" content="width=1280">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/src/ui/style.css">
+<link rel="icon" href="/favicon.ico">
+</head>
+<body class="mode-1">
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+  <div class="logo" data-tip="Pixel to 3D Batch Builder. Turns flat pixel-art sprites into 3D models, voxel models and extra sprite sheets — lots at once.">
+    <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+      <!-- tiny isometric pixel cube -->
+      <!-- solid silhouette underneath so seams between faces can't show the dark background when scaled -->
+      <path fill="#ff9a3c" d="M7 1h2v1h2v1h2v1h1v8h-1v1h-2v1h-2v1H7v-1H5v-1H3v-1H2V4h1V3h2V2h2z"/>
+      <path fill="#ffd23f" d="M8 1h1v1h2v1h2v1h1v1h-2v1h-2v1h-2v1H7V7H5V6H3V5H2V4h1V3h2V2h2V1z"/>
+      <path fill="#ff9a3c" d="M2 5h1v1h2v1h2v1h1v7H7v-1H5v-1H3v-1H2z"/>
+      <path fill="#8fdc4a" d="M14 5v7h-1v1h-2v1H9v1H8V8h1V7h2V6h2V5z"/>
+      <path fill="#171327" opacity=".25" d="M8 8h1v7H8z"/>
+    </svg>
+    <div class="logo-text">
+      <b><span>Pixel</span> to <span>3D</span></b>
+      <small>Batch Builder</small>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-mode="1" data-tip="<b>Step ①</b> Load flat sprites and turn each one into a 6-sided sheet you can paint on in your usual art program.">
+      <span class="num">1</span>Sprites → Sheets
+    </button>
+    <button class="tab" data-mode="2" data-tip="<b>Step ②</b> Load your painted sheets and build 3D models, voxel models and sprite exports from them.">
+      <span class="num">2</span>Sheets → Models
+    </button>
+  </nav>
+
+  <div class="spacer"></div>
+
+  <div class="actions">
+    <button class="btn" id="btnAddFiles" data-tip="Pick one or more picture files to add to the list.">
+      <span class="ico">➕</span><span class="lbl">Add sprites</span>
+    </button>
+    <button class="btn" id="btnAddFolder" data-tip="Add every PNG inside a folder at once.">
+      <span class="ico">📁</span><span class="lbl">Add folder</span>
+    </button>
+    <div class="divider"></div>
+    <button class="btn icon-only" id="btnSave" data-tip="<b>Save session</b> — remembers this list and every setting in a small file, so you can pick up where you left off.">
+      <span class="ico">💾</span>
+    </button>
+    <button class="btn icon-only" id="btnLoad" data-tip="<b>Load session</b> — open a session file you saved earlier.">
+      <span class="ico">📂</span>
+    </button>
+    <button class="btn icon-only" id="btnGuide" data-tip="<b>User guide</b> — how the whole program works, step by step, with tips for choosing settings. Opens in your browser.">
+      <span class="ico">❔</span>
+    </button>
+    <div class="divider"></div>
+    <button class="btn run" id="btnRun" data-tip="Go! Makes a sheet for every sprite in the list and saves them to your output folder.">
+      <span class="ico">▶</span><span class="lbl">Make 12 sheets</span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= MODE 1 ================= -->
+<section class="screen" id="mode1">
+  <div class="pane">
+    <div class="pane-head">
+      <h2>Your sprites <span class="count" id="m1count">12</span></h2>
+      <div class="spacer"></div>
+      <button class="btn small" data-act="selall" data-tip="Select every row (Ctrl+A).">Select all</button>
+      <button class="btn small" data-act="remove" data-tip="Take the selected rows out of the list. Your files on disk are not touched.">🗑 Remove</button>
+    </div>
+    <div class="howto">
+      <span class="step"><b>1</b>Add sprites</span><span class="arrow">→</span>
+      <span class="step"><b>2</b>Set thickness, side &amp; shape</span><span class="arrow">→</span>
+      <span class="step"><b>3</b>Make sheets</span><span class="arrow">→</span>
+      <span class="step away"><b>✎</b>Paint the missing sides in your art app</span><span class="arrow">→</span>
+      <span class="step away"><b>②</b>Build models</span>
+    </div>
+    <div class="massbar" id="m1mass" hidden>
+      <span class="big" id="m1massN">3</span> rows selected — anything you change on one of them changes all of them.
+      <span class="spacer"></span>
+      <button class="btn small" data-act="selnone" data-tip="Unselect everything (Esc).">Unselect</button>
+    </div>
+    <div class="table-wrap"><table class="grid" id="t1"></table></div>
+    <div class="list-foot">
+      <span class="hint-long">Drop PNG files anywhere in this window to add them.</span><span class="hint-short">Drop PNGs here to add them.</span>
+      <span class="scroll-hint" id="m1hint" hidden data-tip="<b>Pro tip:</b> press and hold the middle mouse button (the wheel) over the list, then move the mouse left or right: the list scrolls sideways freely, without having to grab the scrollbar. Shift + mouse wheel scrolls sideways too.">Scroll sideways for more settings →</span>
+      <span class="spacer"></span>
+      <span id="m1sum"></span>
+    </div>
+  </div>
+
+  <aside class="pane">
+    <div class="pane-head">
+      <h2>Sheet preview</h2>
+      <div class="spacer"></div>
+      <div class="seg" id="m1zoom">
+        <button class="on" data-z="fit" data-tip="Fit the whole sheet in the box.">Fit</button>
+        <button data-z="out" class="zstep" data-tip="Zoom out.">−</button>
+        <button data-z="1" id="m1zoomVal" data-tip="Real size: one screen pixel per sheet pixel. Zoom in with + or the mouse wheel over the sheet, and drag to move around.">1:1</button>
+        <button data-z="in" class="zstep" data-tip="Zoom in. The mouse wheel over the sheet zooms too.">+</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="pv-title" id="m1pvTitle"></div>
+      <div class="stage" id="m1stage" style="height:330px">
+        <canvas id="m1sheet"></canvas>
+        <div id="m1labels" class="overlay sidelabels"></div>
+      </div>
+      <div class="toolrow">
+        <label class="switch" data-tip="Show which side of the model each box is. Only shown here — the labels are not written into the picture.">
+          <input type="checkbox" id="m1showLabels" checked><span class="knob"></span>Name the sides
+        </label>
+        <span class="spacer"></span>
+        <button class="btn small" id="m1guide" data-tip="A short picture guide to fixing a sheet in your art program: which way each side faces, and why the sides must agree. Opens in your browser.">❔ How to paint a sheet</button>
+      </div>
+      <dl class="facts" id="m1facts"></dl>
+      <div class="card">
+        <h3>Where sheets go</h3>
+        <div class="folder-row">
+          <div class="folder-path" id="m1out" data-tip="Sheets are saved here. The file name carries the settings, so please don't rename them.">📁 D:\art\props\sheets\</div>
+          <button class="btn small" id="m1outChange" data-tip="Pick a different folder for the finished sheets.">Change</button>
+        </div>
+        <div style="margin-top:10px; display:grid; gap:8px">
+          <label class="switch" data-tip="When the sheets are done, also put them in the ② list so you can build models straight away (handy when the sprite alone was already enough).">
+            <input type="checkbox" checked data-bind="m1.addToSheets"><span class="knob"></span>Also add finished sheets to ②
+          </label>
+          <label class="switch" data-tip="If a sheet with the same name already exists, keep the old one and add a number to the new one, so you never lose painting work.">
+            <input type="checkbox" checked data-bind="m1.neverOverwrite"><span class="knob"></span>Never overwrite a painted sheet
+          </label>
+          <label class="switch browser-only" data-tip="Also download the finished sheets as one zip file. Turn it off while you're still trying settings and only looking at the models in ②; turn it on for the run you want to keep and paint on. (Sheets that don't go to ② are always downloaded.)">
+            <input type="checkbox" checked data-bind="m1.download"><span class="knob"></span>Download the sheets as a zip
+          </label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Sheet frame</h3>
+        <div class="field">
+          <label data-tip="The colour of the frame lines between the six boxes. The frame is only there to keep boxes apart in your art app: the program never reads it, so any colour works. Pick what's easiest on your eyes.">Frame colours</label>
+          <div class="row">
+            <select id="frameSel" data-tip="The colour of the frame lines between the six boxes. The program never reads the frame, so any colour works.">
+              <option value="jv">Jade + violet (default)</option>
+              <option value="single">One colour</option>
+              <option value="classic">Grey + magenta</option>
+              <option value="custom">Custom two colours</option>
+            </select>
+            <span class="swatches">
+              <input type="color" id="frameEdge" value="#1f5a44" data-tip="Edge colour: the two outer lines that touch your art. A dark, dull colour is easiest to judge colours against.">
+              <input type="color" id="frameCore" value="#a63ec5" data-tip="Centre line colour: the line in the middle of each frame. A brighter colour makes the frame clearly 'not art'.">
+            </span>
+          </div>
+          <div class="hint" id="frameHint">Two colours: a calm edge next to your art, and a brighter centre line that says "not art".</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<!-- ================= MODE 2 ================= -->
+<section class="screen" id="mode2" hidden>
+  <div class="pane">
+    <div class="pane-head">
+      <h2>Your sheets <span class="count" id="m2count">9</span></h2>
+      <div class="spacer"></div>
+      <button class="btn small" data-act="selall" data-tip="Select every row (Ctrl+A).">Select all</button>
+      <button class="btn small" data-act="reload" data-tip="Read the sheet files from disk again, for changes made in your art app. The desktop app does this by itself whenever you save a sheet; this button is the fallback.<br>To make a sheet again from its sprite (after changing ① settings), use the <b>↻</b> tags on its row, or run ① again: a sheet ① made is remade in place and keeps its ② settings.">🔄 Reload</button>
+      <button class="btn small" data-act="remove" data-tip="Take the selected rows out of the list. Your files on disk are not touched.">🗑 Remove</button>
+    </div>
+    <div class="massbar" id="m2mass" hidden>
+      <span class="big" id="m2massN">3</span> rows selected — anything you change on one of them changes all of them.
+      <span class="spacer"></span>
+      <button class="btn small" data-act="selnone" data-tip="Unselect everything (Esc).">Unselect</button>
+    </div>
+    <div class="table-wrap"><table class="grid" id="t2"></table></div>
+    <div class="list-foot">
+      <span class="scroll-hint" id="m2hint" hidden data-tip="<b>Pro tip:</b> press and hold the middle mouse button (the wheel) over the list, then move the mouse left or right: the list scrolls sideways freely, without having to grab the scrollbar. Shift + mouse wheel scrolls sideways too.">Scroll sideways for more settings →</span>
+      <span class="spacer"></span>
+      <span id="m2sum"></span>
+    </div>
+  </div>
+
+  <aside class="pane pv-pane">
+    <div class="pane-head">
+      <h2>Model preview</h2>
+      <div class="seg narrow-switch" data-tip="Your screen is narrow, so Preview and Exports share this column. Switch between them here.">
+        <button class="on" data-show="pv">👁 Preview</button><button data-show="ex">📦 Exports</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="pv-title" id="m2pvTitle"></div>
+      <div class="seg wide" id="m2view">
+        <button class="on" data-v="poly" data-tip="The low-poly 3D model (what the GLB file will contain).">🔺 Model</button>
+        <button data-v="vox" data-tip="The voxel version (what the MagicaVoxel file will contain).">🧊 Voxels</button>
+        <button data-v="sheet" data-tip="Your painted sheet, with any paint that didn't make it onto the model marked in red.">🖼 Sheet check</button>
+      </div>
+      <div class="stage stage-3d" id="m2stage" style="height:300px">
+        <canvas id="m2gl" style="display:none"></canvas>
+        <canvas id="m2canvas"></canvas>
+        <canvas id="m2overlay" class="overlay blink"></canvas>
+        <span class="watermark">voxels shown while the model is built…</span>
+      </div>
+      <div class="toolrow">
+        <button class="btn small" id="rotL" data-tip="Turn the model an eighth of a turn (45°) to the left. Every other step looks straight at a side.">⟲</button>
+        <button class="btn small" id="rotR" data-tip="Turn the model an eighth of a turn (45°) to the right. Every other step looks straight at a side.">⟳</button>
+        <div class="seg" id="m2cam">
+          <button class="on" data-c="high" data-tip="Look down at the model from above, standing on its floor.">Above</button>
+          <button data-c="low" data-tip="Look up at the model from below, to check its bottom. The floor is hidden while you do.">Below</button>
+        </div>
+        <div class="seg" id="m2zoom" hidden>
+          <button class="on" data-z="fit" data-tip="Fit the whole sheet in the box.">Fit</button>
+          <button data-z="out" class="zstep" data-tip="Zoom out.">−</button>
+          <button data-z="1" data-tip="Real size: one screen pixel per sheet pixel. Zoom in with + or the mouse wheel over the sheet, and drag to move around.">1:1</button>
+          <button data-z="in" class="zstep" data-tip="Zoom in. The mouse wheel over the sheet zooms too.">+</button>
+        </div>
+        <span class="spacer"></span>
+        <label class="switch" data-tip="A light background for all three views, for sheets with dark paint that's hard to see on the dark one.">
+          <input type="checkbox" id="m2light"><span class="knob"></span>Light
+        </label>
+        <label class="switch danger" data-tip="Blink in red any paint on your sheet that got cut off because the other sides don't agree with it.">
+          <input type="checkbox" id="m2trim" checked><span class="knob"></span>Show cut-off paint
+        </label>
+      </div>
+      <div class="toolrow peelrow" id="peelRow" hidden>
+        <span class="lbl" data-tip="Slice layers off the voxel model to see what's inside. What you find is set by the Inside column. This only changes the preview, never the exported file.">🔪 Peel</span>
+        <div class="seg" id="peelAxis">
+          <button class="on" data-a="front" data-tip="Slice layers off the side facing you.">Front</button>
+          <button data-a="top" data-tip="Slice layers off the top, like taking the lid off.">Top</button>
+        </div>
+        <input type="range" id="peel" min="0" max="10" value="0" data-tip="Drag right to slice away more layers and look deeper inside.">
+        <span class="val" id="peelVal">0 layers</span>
+      </div>
+      <div id="m2callout"></div>
+      <dl class="facts" id="m2facts"></dl>
+
+    </div>
+  </aside>
+
+  <aside class="pane ex-pane">
+    <div class="pane-head">
+      <h2>Exports</h2>
+      <span class="count" id="expCount">4 on</span>
+      <div class="seg narrow-switch" data-tip="Your screen is narrow, so Preview and Exports share this column. Switch between them here.">
+        <button data-show="pv">👁 Preview</button><button class="on" data-show="ex">📦 Exports</button>
+      </div>
+    </div>
+    <div class="exports" id="exports">
+
+      <div class="card" style="padding:8px 10px">
+        <div class="folder-row">
+          <div class="folder-path" id="m2out" data-tip="Everything you export ends up in this folder.">📁 D:\art\props\export\</div>
+          <button class="btn small" id="m2outChange" data-tip="Pick a different folder for the exports.">Change</button>
+        </div>
+        <label class="switch" style="margin-top:8px" data-tip="Give each sheet its own sub-folder (rifle/, mug/ …) instead of putting every file in one big pile.">
+          <input type="checkbox" checked data-bind="m2.folderPerModel"><span class="knob"></span>One folder per model
+        </label>
+      </div>
+
+      <!-- GLB -->
+      <div class="exp on">
+        <div class="exp-head">
+          <label class="check" data-tip="Make a 3D model file (.glb) with its texture. Works in Godot, Unity, Blender and most 3D tools."><input type="checkbox" checked data-bind="exp.glb.on"><span class="box"></span></label>
+          <span class="emoji">🔺</span>
+          <div class="ttl">3D model <small>.glb with texture</small></div>
+          <button class="gear" aria-expanded="true" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv">
+          <div class="note">👁 The <b>🔺 Model</b> view in the preview shows what this file will contain. <a href="#" class="showview" data-v="poly">Show it →</a></div>
+          <div class="field">
+            <label data-tip="How many sprite pixels make one metre in your game. 32 means a 32-pixel-tall sprite becomes 1 metre tall.">Size: pixels per metre</label>
+            <div class="row"><input type="number" value="32" min="1" data-bind="exp.glb.scale" data-tip="How many sprite pixels make one metre in your game. 32 means a 32-pixel-tall sprite becomes 1 metre tall."><span class="hint">32 px = 1 m</span></div>
+          </div>
+          <div class="field">
+            <span class="lbl" data-tip="Where the model's pivot point sits. Bottom-centre is handy for things that stand on the floor.">Pivot point</span>
+            <div class="seg wide" data-bind="exp.glb.pivot">
+              <button data-val="centre" data-tip="Pivot in the exact middle of the model. Good for things that spin or float.">Centre</button>
+              <button class="on" data-val="bottom" data-tip="Pivot in the middle of the model's base. Good for things that stand on the ground.">Bottom-centre</button>
+            </div>
+          </div>
+          <label class="switch" data-tip="Adds a bumpy-surface texture (a normal map) so light catches the pixel details: carved grooves, raised plates, bevelled edges. Gives a retro-yet-modern look. It only shows where light hits at an angle.">
+            <input type="checkbox" data-bind="exp.glb.normalMap"><span class="knob"></span>Bumpy surface (normal map)
+          </label>
+          <div class="field" id="glbStyle" data-tip="How the pixel art turns into bumps. It also decides where the crevice shadows go.">
+            <label>Bump style</label>
+            <select data-bind="exp.glb.style" data-tip="Soft: every colour patch a rounded tile, moulded and clay-like. Chiselled: sharp 1-pixel bevels round every patch, like cut stone. Terraced: patches as flat steps, lighter ones higher, like stamped metal. Engraved: only the dark lines are cut in, as crisp grooves. Studded: every pixel its own little tile, like a mosaic or LEGO. Drawn light: reads your own shading, so lighter pixels face the light.">
+              <option value="soft">Soft — rounded, moulded</option>
+              <option value="chisel" selected>Chiselled — sharp bevels</option>
+              <option value="terrace">Terraced — flat steps</option>
+              <option value="engrave">Engraved — cut-in lines</option>
+              <option value="stud">Studded — a tile per pixel</option>
+              <option value="lit">Drawn light — your shading</option>
+            </select>
+          </div>
+          <div class="field" id="glbBump" data-tip="How deep the fake carving looks. 1 = gentle, 10 = very deep.">
+            <label>Bump strength</label>
+            <div class="row"><input type="range" min="1" max="10" step="1" value="5" data-bind="exp.glb.bump" data-tip="How deep the fake carving looks. 1 = gentle, 10 = very deep. The Model preview shows it while Bumpy surface is on."><span class="val">5</span></div>
+          </div>
+          <div class="field" id="glbGrit" data-tip="Roughens the surface with a tiny random tilt on every pixel, like rough stone, sand or hammered metal. Stronger where the colours are busy. 0 = off.">
+            <label>Grit</label>
+            <div class="row"><input type="range" min="0" max="10" step="1" value="0" data-bind="exp.glb.grit" data-tip="A tiny random tilt on every pixel, on top of the bump style. 0 = off, 10 = very gritty."><span class="val">0</span></div>
+          </div>
+          <div class="field" data-tip="Darkens grooves, gaps and the dark lines between parts, so the detail reads under any light. Uses the Bump style's shape even when Bumpy surface is off.">
+            <label>Crevice shadows</label>
+            <select data-bind="exp.glb.ao" data-tip="In the file: a separate shadow texture (ambient occlusion). Physically correct, but engines like Godot apply it mostly to shade and sky light, so it's subtle under a strong lamp or sun. Painted into the texture: the shadows are part of the colours, so they always show, also on Unlit models.">
+              <option value="off">Off</option>
+              <option value="map">In the file (AO map)</option>
+              <option value="paint">Painted into the texture</option>
+            </select>
+          </div>
+          <div class="field" id="glbAODepth" data-tip="How dark and wide the crevice shadows get. 1 = a hint, 10 = deep black gaps.">
+            <label>Crevice depth</label>
+            <div class="row"><input type="range" min="1" max="10" step="1" value="5" data-bind="exp.glb.aoDepth" data-tip="How dark and wide the crevice shadows get. 1 = a hint, 10 = deep black gaps."><span class="val">5</span></div>
+          </div>
+          <div class="field" data-tip="Makes pixels lighter than their surroundings (trims, rivets, edges, highlights) glossy, so they catch highlights while the body keeps its Material. Not for Unlit models.">
+            <label>Shiny trims</label>
+            <select data-bind="exp.glb.trims" data-tip="Glossy: light trims get shiny highlights. Metallic: light trims turn shiny metal. The rest keeps the row's Metal and Rough values.">
+              <option value="off">Off</option>
+              <option value="glossy">Glossy</option>
+              <option value="metal">Metallic</option>
+            </select>
+          </div>
+          <div class="note">Surface look (matte, shiny metal…) is set per sheet in the <b>Material</b> column.</div>
+        </div>
+      </div>
+
+      <!-- VOX -->
+      <div class="exp on">
+        <div class="exp-head">
+          <label class="check" data-tip="Make a voxel model (.vox) you can open and edit in MagicaVoxel."><input type="checkbox" checked data-bind="exp.vox.on"><span class="box"></span></label>
+          <span class="emoji">🧊</span>
+          <div class="ttl">Voxel model <small>.vox for MagicaVoxel</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="note">👁 The <b>🧊 Voxels</b> view in the preview shows what this file will contain — use 🔪 Peel to look inside. <a href="#" class="showview" data-v="vox">Show it →</a></div>
+          <div class="note">What's inside the model is set per sheet in the <b>Inside</b> column; its colours, noise, pattern and <b>Hollow core</b> are in the columns next to it.</div>
+          <div class="field">
+            <label data-tip="MagicaVoxel allows 255 colours per model. Merge: similar colours are merged until they fit. Warn and skip: a model whose painted colours don&#39;t fit gets no .vox file, and the run tells you which ones. The inside&#39;s shades are merged either way, since they&#39;re made up by the Inside style.">When there are too many colours</label>
+            <select data-bind="exp.vox.tooMany" data-tip="MagicaVoxel allows 255 colours per model. Merge: similar colours are merged until they fit. Warn and skip: a model whose painted colours don&#39;t fit gets no .vox file, and the run tells you which ones. The inside&#39;s shades are merged either way, since they&#39;re made up by the Inside style."><option value="merge">Merge similar colours</option><option value="skip">Warn me and skip the file</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side PNGs -->
+      <div class="exp">
+        <div class="exp-head">
+          <label class="check" data-tip="Save the six sides of each sheet as six separate pictures (front.png, back.png …), cropped to the model."><input type="checkbox" data-bind="exp.sides.on"><span class="box"></span></label>
+          <span class="emoji">🖼</span>
+          <div class="ttl">6 side pictures <small>one PNG per side</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show a preview of what this export makes."><span class="chev">▸</span> Preview</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="xpv" data-pv="sides"></div>
+          <div class="hint">Nothing to set: each side is saved as its own picture, cropped to the model.</div>
+        </div>
+      </div>
+
+      <!-- Rendered sprites: direction, isometric and side-view sheets as "sprite sets" -->
+      <div class="exp on">
+        <div class="exp-head">
+          <label class="check" data-tip="Draw the model from chosen camera angles into sprite sheets: facing 4, 8, 16… ways, isometric, side view and more."><input type="checkbox" checked data-bind="exp.sprites.on"><span class="box"></span></label>
+          <span class="emoji">🧭</span>
+          <div class="ttl">Rendered sprites <small>direction, isometric &amp; side views</small></div>
+          <button class="gear" aria-expanded="true" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv">
+          <div class="sets" id="sets"></div>
+          <button class="btn small" id="addSet" data-tip="Make another kind of sprite sheet from the same models in the same run — e.g. isometric AND Doom-style.">➕ Add another sprite set</button>
+          <div class="hint">Each set makes its own sheet per model, e.g. <b>rifle_isometric.png</b>. Presets are small files — drop your own in the Presets folder.</div>
+        </div>
+      </div>
+
+      <!-- Stack -->
+      <div class="exp">
+        <div class="exp-head">
+          <label class="check" data-tip="Cut the voxel model into thin layers and line them up in a strip. Games stack these layers to fake 3D (like NIUM)."><input type="checkbox" data-bind="exp.stack.on"><span class="box"></span></label>
+          <span class="emoji">🥞</span>
+          <div class="ttl">Sprite stack strip <small>layers for fake-3D games</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="xpv" data-pv="stack"></div>
+          <div class="field">
+            <label data-tip="Which way to cut the model into layers. Usually bottom-to-top.">Cut into layers along</label>
+            <select id="stackAxis" data-bind="exp.stack.axis" data-tip="Which way to cut the model into layers. Usually bottom-to-top."><option value="y">Height (↕ bottom to top)</option><option value="z">Depth (⊙ front to back)</option><option value="x">Width (↔ left to right)</option></select>
+          </div>
+          <div class="field">
+            <span class="lbl" data-tip="Which layer comes first in the strip.">Order in the strip</span>
+            <div class="seg wide" id="stackOrder" data-bind="exp.stack.order"><button class="on" data-val="bottom" data-tip="The bottom layer is the first picture.">Bottom first</button><button data-val="top" data-tip="The top layer is the first picture.">Top first</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turntable -->
+      <div class="exp on">
+        <div class="exp-head">
+          <label class="check" data-tip="A spinning animated GIF of the model. Nice for itch.io pages and showing off."><input type="checkbox" checked data-bind="exp.turntable.on"><span class="box"></span></label>
+          <span class="emoji">🎠</span>
+          <div class="ttl">Turntable GIF <small>spinning showcase</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="field">
+            <div class="xpv" data-pv="turn"></div>
+          </div>
+          <div class="field">
+            <span class="lbl" data-tip="Which of the two models spins in the GIF.">Draw from</span>
+            <div class="seg wide" id="ttFrom" data-bind="exp.turntable.from"><button class="on" data-val="mesh" data-tip="Spin the low-poly model, as in the 3D model file.">🔺 Low-poly model</button><button data-val="voxels" data-tip="Spin the voxel model, as in the .vox file: every pixel a little cube.">🧊 Voxel model</button></div>
+          </div>
+          <div class="field">
+            <label data-tip="How high the camera sits while the model spins. For showing off a model, stay between −15° and +15°; go higher if your game looks down on things.">Camera height</label>
+            <div class="row"><input type="range" id="ttElev" min="-30" max="60" value="0" data-bind="exp.turntable.elev" data-tip="How high the camera sits while the model spins. For showing off a model, stay between −15° and +15°; go higher if your game looks down on things."><span class="val" id="ttVal">0°</span></div>
+            <div class="row chips" id="ttChips">
+              <button data-v="-15" data-tip="Recommended: below, looking up (−15°). Makes things look big and heroic.">Low −15°</button>
+              <button data-v="0" class="on" data-tip="Recommended: eye level (0°). The honest, neutral view.">Level 0°</button>
+              <button data-v="15" data-tip="Recommended: above, looking down (+15°). Shows the top nicely.">High +15°</button>
+            </div>
+          </div>
+          <div class="field">
+            <label data-tip="How many pictures one full spin has. More = smoother, bigger file.">Frames per spin</label>
+            <div class="row"><input type="number" id="ttFrames" value="24" min="4" max="120" data-bind="exp.turntable.frames" data-tip="How many pictures one full spin has. More = smoother, bigger file."></div>
+          </div>
+          <div class="field">
+            <label data-tip="How big the GIF is, in pixels.">GIF size</label>
+            <div class="row"><input type="number" value="128" min="8" max="1024" data-bind="exp.turntable.size" data-tip="How big the GIF is, in pixels."><span class="hint">px square</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Palette -->
+      <div class="exp">
+        <div class="exp-head">
+          <label class="check" data-tip="Save the colours used by each model as a palette file for your art app."><input type="checkbox" data-bind="exp.palette.on"><span class="box"></span></label>
+          <span class="emoji">🎨</span>
+          <div class="ttl">Colour palette <small>.gpl / .hex</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="xpv" data-pv="pal"></div>
+          <label class="switch" data-tip="GIMP / Aseprite / Krita palette format."><input type="checkbox" checked data-bind="exp.palette.gpl"><span class="knob"></span>.gpl (GIMP, Aseprite, Krita)</label>
+          <label class="switch" data-tip="A plain list of colour codes, one per line. Lospec-style."><input type="checkbox" data-bind="exp.palette.hex"><span class="knob"></span>.hex (plain colour list)</label>
+        </div>
+      </div>
+
+      <!-- Pixel look (shared) -->
+      <div class="exp on" style="border-color: rgba(77,184,255,.45)">
+        <div class="exp-head">
+          <span class="emoji" data-tip="These settings affect every export that draws the model into pixels: all rendered sprite sets and the turntable GIF.">✨</span>
+          <div class="ttl">Pixel-perfect look <small>for rendered sprites &amp; turntable</small></div>
+          <button class="gear" aria-expanded="false" data-tip="Show or hide the extra options for this export."><span class="chev">▸</span> Options</button>
+        </div>
+        <div class="adv" hidden>
+          <div class="note">👁 Changes show up in the <b>Rendered sprites</b> and <b>Turntable</b> previews.</div>
+          <label class="switch" data-tip="Draw a crisp 1-pixel outline around the model and along its inner edges."><input type="checkbox" id="ppOutline" checked data-bind="exp.look.outline"><span class="knob"></span>1-pixel outlines</label>
+          <div class="field">
+            <span class="lbl" data-tip="How light falls on the model. Flat = no shading. Bands = a few hard steps of light and dark, no blurry gradients.">Lighting</span>
+            <div class="seg wide" id="ppLight" data-bind="exp.look.light">
+              <button data-val="flat" data-tip="No shading at all — pure sprite colours.">Flat</button>
+              <button data-val="2" data-tip="Two hard steps: lit and shadow.">2</button>
+              <button class="on" data-val="3" data-tip="Three hard steps of light.">3</button>
+              <button data-val="4" data-tip="Four hard steps of light.">4</button>
+            </div>
+          </div>
+          <div class="field">
+            <label data-tip="Snap every pixel to a fixed set of colours so the result looks hand-made instead of blurry.">Snap colours to</label>
+            <select data-bind="exp.look.snap" data-tip="Snap every pixel to a fixed set of colours so the result looks hand-made instead of blurry."><option value="model">The model's own colours</option><option value="preset">The preset's palette</option><option value="off">Don't snap</option></select>
+          </div>
+          <div class="field">
+            <label data-tip="If sprites come out with missing or broken pixels at odd angles, this draws them bigger first and shrinks them carefully.">Fix broken pixels at odd angles</label>
+            <select data-bind="exp.look.fix" data-tip="If sprites come out with missing or broken pixels at odd angles, this draws them bigger first and shrinks them carefully."><option value="auto">Only when needed</option><option value="always">Always</option><option value="never">Never</option></select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+</section>
+
+</main>
+
+<footer class="statusbar">
+  <span class="hint-long">Click a row · <kbd>Shift</kbd>+click selects a range · <kbd>Ctrl</kbd>+click adds or removes one · <kbd>Ctrl</kbd>+<kbd>A</kbd> selects all</span>
+  <span class="hint-short"><kbd>Shift</kbd>/<kbd>Ctrl</kbd>+click to select many</span>
+  <span class="spacer"></span>
+  <span id="sessionName" data-tip="The session this list belongs to. It's saved automatically every few seconds, so nothing is lost if the program closes.">props_batch_01</span>
+  <span><span class="dot"></span><span id="autosaveState">Autosaved just now</span></span>
+  <a class="credit" href="https://linktr.ee/reactorcore" target="_blank" rel="noopener" data-tip="Made by Reactorcore — opens my links page in your browser.">Made by Reactorcore</a>
+</footer>
+
+<div id="tip"></div>
+<div id="toast"></div>
+<div class="modal-bg" id="modalBg" hidden><div class="modal" id="modal"></div></div>
+
+<!-- Hidden pickers behind the Add sprites, Add folder and Load session buttons (browser build). -->
+<input type="file" id="pickFiles" accept=".png,image/png" multiple hidden>
+<input type="file" id="pickFolder" webkitdirectory hidden>
+<input type="file" id="pickSession" accept=".json,application/json" hidden>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

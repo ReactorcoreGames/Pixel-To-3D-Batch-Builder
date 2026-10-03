@@ -1,0 +1,15 @@
+{
+  "order": 30,
+  "id": "side34",
+  "name": "Side view ¾",
+  "file": "sideview",
+  "sub": "Advance Wars-style",
+  "dirs": 2,
+  "start": "side",
+  "elev": 25,
+  "cam": "ortho",
+  "cell": 16,
+  "mirror": true,
+  "pal": "No limit",
+  "tip": "Side view from slightly above, so the top and the side both show — like the map units in Advance Wars. Drawn facing one way; the game flips it for the other."
+}

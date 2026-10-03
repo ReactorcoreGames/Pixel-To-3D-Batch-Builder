@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.claude/
+*.log
+/cli/
+# build_release.bat's output (the release folder and its zip)
+/release/
+# what the desktop app keeps beside its exe (autosave, WebView2 data)
+settings/
+# old material kept out of the repo
+old wip/
+# sample files a test writes on request (WRITE_TEST_VOX=1)
+tests/out/
+__pycache__/
+*.pyc
+.vscode/
+Thumbs.db
+desktop.ini

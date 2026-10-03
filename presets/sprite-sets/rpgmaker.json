@@ -1,0 +1,16 @@
+{
+  "order": 60,
+  "id": "rpgm",
+  "name": "RPG Maker",
+  "file": "rpgmaker",
+  "sub": "4 ways · 48px sheet",
+  "dirs": 4,
+  "start": "front",
+  "elev": 30,
+  "cam": "ortho",
+  "cell": 48,
+  "mirror": false,
+  "pal": "No limit",
+  "layout": "rpgmaker",
+  "tip": "RPG Maker MV/MZ character sheet: facing down, left, right and up from a ¾ top-down view, in 48 px cells. Saved as !$name.png (one object per file), with the pose repeated in the three walking columns."
+}

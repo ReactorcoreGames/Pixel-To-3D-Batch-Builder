@@ -1,0 +1,15 @@
+{
+  "order": 20,
+  "id": "headon",
+  "name": "Head-on",
+  "file": "headon",
+  "sub": "4 ways · no tilt",
+  "dirs": 4,
+  "start": "front",
+  "elev": 0,
+  "cam": "ortho",
+  "cell": 64,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "Straight-on views with no tilt: front, right, back, left. Good for side-scrollers, cards and icons. Set Directions to 1 for just the front."
+}

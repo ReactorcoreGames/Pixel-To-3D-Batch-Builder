@@ -1,0 +1,15 @@
+{
+  "order": 80,
+  "id": "rts",
+  "name": "Classic RTS",
+  "file": "rts",
+  "sub": "32 ways · 2:1 view",
+  "dirs": 32,
+  "start": "front",
+  "elev": 30,
+  "cam": "ortho",
+  "cell": 48,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "Strategy game units like Tiberian Sun and Red Alert 2: 32 directions, seen from the same 30° height as their 2:1 map tiles. (Those games drew vehicles from voxel models, so the .vox export is also worth a look.)"
+}

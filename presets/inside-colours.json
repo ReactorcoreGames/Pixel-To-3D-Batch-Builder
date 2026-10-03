@@ -1,0 +1,13 @@
+{
+  "nearest": ["#6b4a2f","#a8784a","#e8d2a6"],
+  "solid": ["#e8c07a","#c99a52","#fff0c8"],
+  "hollow": ["#6b4a2f","#a8784a","#e8d2a6"],
+  "noise": ["#6d6a75","#8d8a96","#4d4a55"],
+  "onion": ["#d9a441","#f1d48a","#fff2c4"],
+  "rings": ["#8a5a2c","#c08a4e","#e3c08a"],
+  "strata": ["#7a4a2a","#c08a4e","#e8d2a6"],
+  "crystal": ["#b04ce0","#4db8ff","#52e3a4"],
+  "fractal": ["#e8e3f5","#9e97b8","#5a5470"],
+  "flesh": ["#b8323f","#e2727a","#f3ead2"],
+  "machine": ["#2b2f3a","#3fb0ff","#ffb020"]
+}

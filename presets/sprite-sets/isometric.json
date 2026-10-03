@@ -1,0 +1,15 @@
+{
+  "order": 10,
+  "id": "iso",
+  "name": "Isometric",
+  "file": "isometric",
+  "sub": "4 ways · 2:1 pixel iso",
+  "dirs": 4,
+  "start": "diag",
+  "elev": 30,
+  "cam": "ortho",
+  "cell": 64,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "Classic pixel-art isometric, like SimCity 2000 or Transport Tycoon: 4 diagonal views with the camera 30° up, which gives the clean \"2 across, 1 up\" pixel lines."
+}

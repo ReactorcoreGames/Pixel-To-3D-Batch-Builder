@@ -1,0 +1,16 @@
+{
+  "order": 50,
+  "id": "doom",
+  "name": "Doom-style",
+  "file": "doom",
+  "sub": "8 ways · eye level",
+  "dirs": 8,
+  "start": "front",
+  "elev": 0,
+  "cam": "ortho",
+  "cell": 64,
+  "mirror": true,
+  "pal": "Doom palette (256)",
+  "layout": "doom",
+  "tip": "Like classic Doom monsters: 8 directions at eye level (5 drawn, 3 mirrored by the game), locked to the Doom colour palette. Saved as separate Doom sprite files (RIFLA1.png, RIFLA2A8.png…) with their offsets, ready for SLADE, ZDoom and GZDoom."
+}

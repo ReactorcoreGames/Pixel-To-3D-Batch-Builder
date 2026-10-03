@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel to 3D Batch Builder guide</title>
+<link rel="icon" href="img/icon-32.png">
+<style>
+  @font-face { font-family: "Nunito"; font-weight: 200 1000; src: url(fonts/nunito-latin.woff2) format("woff2"); }
+
+  /* "Cartridge Night", the app's colour scheme */
+  :root {
+    --bg: #171327; --bg-dot: #221c3a; --panel: #262043; --panel-2: #2e2750; --panel-3: #3b3163; --field: #1c1733; --line: #4a3f78;
+    --text: #f5f0ff; --dim: #b9aee0; --faint: #8a7fb5;
+    --m1: #ff9a3c; --m2: #8fdc4a; --sun: #ffd23f; --sel: #7c6cff; --sky: #4db8ff; --ok: #52e3a4; --warn: #ffb020; --err: #ff4d6d;
+    --head: "Nunito", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--text); font: 600 16px/1.6 "Nunito", "Segoe UI", system-ui, sans-serif;
+    background-color: var(--bg); background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px); background-size: 18px 18px;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 28px 16px 56px; }
+  h1, h2, h3 { font-family: var(--head); font-weight: 900; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
+  h1 { font-size: clamp(28px, 6vw, 42px); color: var(--sun); }
+  h1 img { width: 48px; height: 48px; image-rendering: pixelated; vertical-align: -8px; margin-right: 12px; }
+  h2 { font-size: 26px; margin: 52px 0 14px; }
+  h2 .n { display: inline-grid; place-items: center; min-width: 36px; height: 36px; border-radius: 50%; background: var(--sun); color: var(--bg); font-size: 19px; margin-right: 10px; vertical-align: 2px; padding: 0 6px; }
+  h2.m1 .n { background: var(--m1); } h2.m2 .n { background: var(--m2); }
+  h3 { font-size: 19px; margin: 28px 0 8px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 24px; }
+  li { margin-bottom: 6px; }
+  b { font-weight: 800; }
+  a { color: var(--sky); }
+  .dim, small { color: var(--dim); }
+  .lead { font-size: 18px; color: var(--dim); max-width: 760px; }
+  code { font-size: 14px; background: var(--field); border-radius: 6px; padding: 1px 6px; overflow-wrap: anywhere; }
+  kbd { font: 800 13px "Nunito", sans-serif; background: var(--panel-3); border-radius: 6px; padding: 1px 7px; box-shadow: 0 2px 0 #0f0c1c; white-space: nowrap; }
+  .card { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; padding: 16px 18px; margin: 0 0 14px; }
+  .card > :last-child { margin-bottom: 0; }
+  .tip { border-left: 5px solid var(--sky); }
+  .warn { border-left: 5px solid var(--warn); }
+  .quick { border-color: var(--sun); }
+  .quick h2 { margin: 0 0 10px; font-size: 22px; color: var(--sun); }
+  .quick ol { counter-reset: q; list-style: none; padding: 0; }
+  .quick ol li { counter-increment: q; position: relative; padding-left: 40px; margin-bottom: 10px; }
+  .quick ol li::before { content: counter(q); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 8px; background: var(--sun); color: var(--bg); font-weight: 900; display: grid; place-items: center; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+  .toc a { display: block; color: var(--text); text-decoration: none; background: var(--panel-2); border: 2px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 14px; }
+  .toc a:hover { border-color: var(--sun); }
+  figure { margin: 0 0 16px; }
+  figure img { display: block; width: 100%; height: auto; border-radius: 12px; border: 2px solid var(--line); }
+  figcaption { color: var(--dim); font-size: 14px; margin-top: 6px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 374px)); gap: 14px 24px; justify-content: center; }
+  .table-wrap { overflow-x: auto; margin: 0 0 14px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; background: var(--panel); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  th { background: var(--panel-3); font-weight: 800; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 800; white-space: nowrap; }
+  .sizes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .sizes .card { margin: 0; }
+  .sizes .card h3 { margin: 0 0 6px; color: var(--sky); }
+  .sizes .card p { font-size: 15px; }
+  .links { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .links a { white-space: nowrap; }
+  footer { margin-top: 56px; padding-top: 20px; border-top: 2px solid var(--line); color: var(--dim); font-size: 15px; }
+  @media (max-width: 700px) { td:first-child { white-space: normal; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1><img src="img/icon-48.png" alt="">Pixel to 3D Batch Builder</h1>
+<p class="lead">Turns flat pixel-art sprites (up to 128 × 128) into rough-draft 3D models in the SNES / N64 / PS1 style, lots at once: low-poly <b>GLB</b> models, <b>MagicaVoxel</b> models, and 2D extras such as rendered sprite sheets and turntable GIFs. It works in two steps: ① every sprite becomes a <b>sheet</b> showing all six sides, which you can touch up in your own art program, and ② the sheets become models.</p>
+
+<div class="card quick">
+  <h2>Quick start</h2>
+  <ol>
+    <li>Unzip the download anywhere and run <b>Pixel to 3D Batch Builder.exe</b>. The first time, it opens an example batch of 71 sprites to play with. Click around: every button and column explains itself when you hover it.</li>
+    <li>To start your own batch, click <b>Select all</b> then <b>🗑 Remove</b> (your files are never touched), then <b>➕ Add sprites</b> or drop PNG files on the window.</li>
+    <li>For each sprite, set its <b>Thickness</b>, which side it shows (<b>Sprite shows</b>) and a <b>Shape</b>. Select many rows to change them all at once.</li>
+    <li>Press <b>▶ Make N sheets</b>. Then (optionally) open the sheets in your art program and fix whatever the program couldn't guess. See <a href="paint-a-sheet.html">How to paint a sheet</a>.</li>
+    <li>Press <b>Go to ② →</b>, tick the exports you want on the right, and press <b>▶ Export N models</b>. Done!</li>
+  </ol>
+  <p class="dim">An unpainted sheet is fine too: if the sprite alone says enough, go straight from ① to ②.</p>
+</div>
+
+<ul class="toc">
+  <li><a href="#folder">What's in the folder</a></li>
+  <li><a href="#step1">① Sprites → Sheets</a></li>
+  <li><a href="#shapes">Shapes</a></li>
+  <li><a href="#size">Thickness &amp; box size</a></li>
+  <li><a href="#paint">Painting</a></li>
+  <li><a href="#step2">② Sheets → Models</a></li>
+  <li><a href="#exports">Exports</a></li>
+  <li><a href="#lists">Lists &amp; sessions</a></li>
+  <li><a href="#godot">Godot preview</a></li>
+  <li><a href="#cli">Command line</a></li>
+  <li><a href="#trouble">Troubleshooting</a></li>
+</ul>
+
+<!-- ============================================================ folder -->
+<h2 id="folder"><span class="n">📦</span>What's in the folder</h2>
+<div class="table-wrap"><table>
+  <tr><th>File or folder</th><th>What it is</th></tr>
+  <tr><td>Pixel to 3D Batch Builder.exe</td><td>The program. No installing: it runs from wherever you unzip it, and you can move or copy the whole folder.</td></tr>
+  <tr><td>guide/</td><td>This guide and <a href="paint-a-sheet.html">How to paint a sheet</a>. The ❔ button in the program opens this page; the button in ① opens the painting guide.</td></tr>
+  <tr><td>examples/</td><td>The example batch the program opens on its first start: 71 sprites, their sheets and a session with settings for each.</td></tr>
+  <tr><td>presets/</td><td>Sprite set presets (one small file each), inside-style colours and palettes. Your own presets are saved here too, as <code>my-….json</code>.</td></tr>
+  <tr><td>godot-preview/</td><td>A ready-made <a href="#godot">Godot project</a> for looking at your models under real game-engine lighting.</td></tr>
+  <tr><td>cli/ and CLI.md</td><td>A <a href="#cli">command-line version</a>, mainly for AI helpers and scripts. Needs Node.js.</td></tr>
+  <tr><td>settings/</td><td>Made by the program on its first start: the autosave and its browser engine's data. Delete it to start completely fresh (the example opens again).</td></tr>
+</table></div>
+
+<!-- ============================================================ step 1 -->
+<h2 id="step1" class="m1"><span class="n">1</span>Sprites → Sheets</h2>
+<figure><img src="img/step1.png" alt="Step one: the list of sprites on the left with a setting per column, and the chest's sheet in the preview on the right" width="1280" height="720"><figcaption>Step ①: one row per sprite on the left; the selected sprite's sheet on the right, with its six boxes named.</figcaption></figure>
+
+<h3>Adding sprites</h3>
+<p><b>➕ Add sprites</b> picks files, <b>📁 Add folder</b> adds every PNG directly inside a folder (not its sub-folders), or just drop files and folders anywhere on the window. Sprites must be PNGs with a see-through background, at most 128 × 128 pixels. A sprite that's too big gets a red <b>✖</b> and is skipped.</p>
+<p>If a file name ends with a side code, <b>Sprite shows</b> is filled in for you (marked 🏷): <code>_F</code> Front, <code>_Bk</code> Back, <code>_L</code> Left, <code>_R</code> Right, <code>_T</code> Top, <code>_Bt</code> Bottom. So <code>sword_R.png</code> is a sword drawn from its right side.</p>
+
+<h3>The settings for each sprite</h3>
+<div class="table-wrap"><table>
+  <tr><th>Column</th><th>What it does</th></tr>
+  <tr><td>Thickness</td><td>How many pixels thick the object is: the one size a flat picture can't tell. A sword might be 2, a crate as thick as it is wide, a ball as thick as it is tall.</td></tr>
+  <tr><td>Sprite shows</td><td>Which side of the object your drawing is: Front, Back, Left, Right, Top or Bottom. Left and Right are as seen when you face the object's front. This decides which way is up.</td></tr>
+  <tr><td>Shape</td><td>How the object is rounded where your drawing can't show it. See <a href="#shapes">Shapes</a>.</td></tr>
+  <tr><td>Ends</td><td>Tube and Diamond only: round or point one end or both, for bullets, stakes, pencils, capsules.</td></tr>
+  <tr><td>Outline</td><td>Tick it when your sprite has a dark 1-pixel outline. The program then looks past the outline for the real colours, and draws a fresh outline round the sides it works out.</td></tr>
+  <tr><td>Copy sides</td><td>Puts your drawing on every side (turned to face it) instead of working the sides out. Good for things that look much the same all round: crates, boulders.</td></tr>
+  <tr><td>Model size, Box, OK?</td><td>Read-only: the object's size in pixels, the size of the sheet's boxes, and whether the row is ready (✓) or has a problem (✖, hover it for the fix).</td></tr>
+</table></div>
+
+<h3>Where the sheets go</h3>
+<p>Under the preview, <b>Where sheets go</b> holds the sheets folder (asked for on the first run if you haven't picked one). Three switches matter:</p>
+<ul>
+  <li><b>Never overwrite a painted sheet</b> (on): if a sheet with that name already exists, it's kept and the new one gets a number (<code>rifle_2__32_R_cyW.png</code>), so you never lose painting work.</li>
+  <li><b>Also add finished sheets to ②</b> (on): the new sheets go straight into the ② list, with a <b>Go to ② →</b> button.</li>
+  <li><b>Sheet frame</b>: the colour of the lines between the boxes. The program never reads them, so pick whatever is easiest on your eyes.</li>
+</ul>
+<h3>Changed your mind? Just run ① again</h3>
+<p>Picked the wrong thickness or shape? Change it in ① and press <b>Make sheets</b> again. A sheet ① already put in ② is <b>remade in place</b>: its ② row gets the new sheet and keeps every ② setting you gave it, and the old file moves into a <code>replaced</code> folder next to it (nothing is ever thrown away). Sheets whose sprite and settings didn't change are left alone.</p>
+<p>A sheet you've <b>painted on</b> is never replaced, whatever you do in ①. The new sheet is saved next to it with a number, and its ② row goes right below the painted one, with the same ② settings. So you can try things freely before painting, and your painting is safe after.</p>
+<div class="card warn"><p><b>Keep the sheets' file names.</b> The part after the double underscore, like <code>__32_R_cyW</code>, stores the box size, side and shape. A renamed sheet still loads, but its side and shape become guesses you have to set in ②.</p></div>
+
+<!-- ============================================================ shapes -->
+<h2 id="shapes"><span class="n">⬭</span>Choosing a shape</h2>
+<p>Your sprite shows one side; the shape decides how the rest is rounded. The arrows are about <b>your drawing as you see it</b>: ↔ runs along its width, ↕ along its height, ⊙ straight out of the picture towards you. Each slice is rounded on its own, so a rifle with Tube ↔ gets a round barrel and a separately rounded stock.</p>
+<div class="table-wrap"><table>
+  <tr><th>Shape</th><th>Good for</th></tr>
+  <tr><td>■ Box</td><td>Crates, walls, books, signs, anything flat-sided. The safe default.</td></tr>
+  <tr><td>▢ Soft box</td><td>Boxes with rounded-off edges: cushions, chests, soap.</td></tr>
+  <tr><td>⬭ Tube ↔</td><td>Things lying along the drawing's width: gun barrels and swords drawn from the side, logs, pipes.</td></tr>
+  <tr><td>⬭ Tube ↕</td><td>Things standing up: bottles, mugs, barrels, lamps, tree trunks, potted plants.</td></tr>
+  <tr><td>⬭ Tube ⊙</td><td>Round things drawn face-on: wheels, coins, tyres, shields, buttons.</td></tr>
+  <tr><td>◆ Diamond ↔ / ↕ / ⊙</td><td>The same three directions with a pointed cross-section: blades, crystals, arrowheads.</td></tr>
+  <tr><td>● Egg / ball</td><td>Rounded in every direction: balls, eggs, boulders, blobs, rugby balls.</td></tr>
+  <tr><td>◈ Gem</td><td>Pointy in every direction: cut gems, double pyramids, faceted rocks.</td></tr>
+</table></div>
+<p><b>Ends</b> (Tube and Diamond): Flat, or one end, or both, named by the arrow of the shape (← Left / → Right / ↔ Both for ↔ shapes, ↑ Top / ↓ Bottom / ↕ Both for ↕, ⊙ Front / ⊗ Back / ⊙⊗ Both for ⊙). A bullet drawn end-on as a circle, with Tube ⊙ and its front end rounded, becomes a real bullet.</p>
+<div class="card tip"><p><b>Not sure?</b> Try two shapes and compare the sheets in the preview, or the models in ②. Things with a complicated 3D structure (a potted plant with winding branches) won't come out perfect with any shape: that's what painting the sheet is for.</p></div>
+
+<!-- ============================================================ size -->
+<h2 id="size"><span class="n">▣</span>Thickness and box size</h2>
+<p>Every sheet is made of six square boxes, one per side, all the same size: the object's largest size (width, height or thickness) rounded up to <b>8, 16, 32, 64 or 128</b>. The spare room lets you make the object bigger while painting. The same sizes make good voxel models. A rough guide:</p>
+<div class="sizes">
+  <div class="card"><h3>8 – 16</h3><p>Small props, items, pickups, projectiles, tiny retro characters. Fast to make; every pixel counts.</p></div>
+  <div class="card"><h3>32</h3><p>The sweet spot: characters, enemies, furniture, vehicles, scenery pieces. Enough room for recognisable details.</p></div>
+  <div class="card"><h3>64</h3><p>Big or important things: bosses, detailed vehicles, building fronts. More detail, more work to paint, slower to build.</p></div>
+  <div class="card"><h3>128</h3><p>The limit: huge pieces and showcase models. Builds take a few seconds each, and it starts to feel less "pixel".</p></div>
+</div>
+<p>Keep things that belong together at the same scale (one sprite pixel = one model pixel), and they'll fit together in your game.</p>
+
+<!-- ============================================================ paint -->
+<h2 id="paint"><span class="n">✎</span>Painting the sheets (optional)</h2>
+<p>Open a sheet in any art program that saves PNGs with transparency (Aseprite, Paint.NET, Paint Shop Pro, …), paint the sides the program couldn't guess, and save over the same file. Paint adds to the shape, erasing cuts into it. The rules are short but they matter; they're all in <a href="paint-a-sheet.html"><b>How to paint a sheet</b></a> (also the button under the ① preview): which way each box faces, why the sides must agree, and settings for your art program.</p>
+<p>While the program is open, sheets in the ② list are read again every time you save them, so you can keep both windows side by side: paint, save, look.</p>
+
+<!-- ============================================================ step 2 -->
+<h2 id="step2" class="m2"><span class="n">2</span>Sheets → Models</h2>
+<figure><img src="img/step2-model.png" alt="Step two: the list of sheets on the left, the barrel's low-poly model in the middle, and the export options on the right" width="1280" height="720"><figcaption>Step ②: sheets on the left, the selected model in the middle, exports on the right.</figcaption></figure>
+<p>Sheets made in ① arrive here by themselves. You can also add sheets with <b>➕ Add sheets</b>, <b>📁 Add folder</b> or by dropping them on the window. A sheet that was resized or cropped can't be read: it gets a ✖ saying what's wrong.</p>
+<p>Two tags on a row link it back to ①, for sheets ① made:</p>
+<ul>
+  <li><b>out of date ↻</b> (next to OK?): the sprite or its ① settings changed since this sheet was made. Click it to remake the sheet; the row keeps its settings.</li>
+  <li><b>changed ↻</b> (orange, next to Shape or Ends): you picked a different shape here than the sheet was made for, so the sheet's new sides may not fit it. Click it to use your choice in ① too and remake the sheet to match.</li>
+</ul>
+<p><b>🔄 Reload</b> only reads the sheet files from disk again (for changes saved in your art program); the desktop app already does that by itself. To make a sheet again from its sprite, use the tags above or run ① again.</p>
+
+<h3>The preview</h3>
+<ul>
+  <li><b>🔺 Model</b> is the low-poly model, exactly what the GLB file holds. <b>🧊 Voxels</b> is the voxel version (the <code>.vox</code> file), with a <b>Peel</b> slider to slice it open and see the inside. <b>🖼 Sheet check</b> is your sheet with any cut-off paint blinking red.</li>
+  <li><b>⟲ ⟳</b> turn the model an eighth at a time, <b>Above / Below</b> moves the camera, and <b>Light</b> switches to a pale background for dark models.</li>
+  <li>The numbers underneath give the measured size, triangles, voxels and texture size.</li>
+</ul>
+
+<h3>The settings for each sheet</h3>
+<p>Every column has a tooltip. The list scrolls sideways; hold the middle mouse button over it and move, or use <kbd>Shift</kbd> + the wheel.</p>
+<div class="table-wrap"><table>
+  <tr><th>Column</th><th>What it does</th></tr>
+  <tr><td>Sprite was, Shape, Ends</td><td>Read from the file name (tagged <b>name</b>); change them here to try something else without making a new sheet.</td></tr>
+  <tr><td>Round sides</td><td>How many flat sides round shapes get. 8 is the classic PS1 look; 12–16 for smooth balls.</td></tr>
+  <tr><td>Straighten slopes</td><td>How much pixel staircases are smoothed into straight slopes. 0 keeps every pixel step; higher values lose 1-pixel details.</td></tr>
+  <tr><td>Split ↔ ↕ ⊙, Blend</td><td>Only matter when opposite boxes of a sheet are painted differently: where the front part ends and the back part starts (0.5 = halfway), and whether the change is a sudden step or terraces. Split ↕ also sets how deep a hole painted on Top goes (mugs, buckets). See section 4 of the painting guide.</td></tr>
+  <tr><td>Gap colour</td><td>Where a spot no box painted takes its colour from: the opposite box, or the nearest painted pixel.</td></tr>
+  <tr><td>Material, Metal, Rough</td><td>How the 3D model reflects light: Matte, Plastic, Dull metal, Shiny metal or Unlit (flat colours, very PS1). Metal and Rough fine-tune it.</td></tr>
+  <tr><td>Inside, colours, Noise, Pattern, Hollow core</td><td>What the voxel model looks like when cut open: like the outside, solid, hollow, speckled, onion layers, tree rings, layer cake, crystal, marble swirl, flesh &amp; bone, machine. Hollow core leaves the middle empty with walls of that thickness. Only the <code>.vox</code> file has an inside.</td></tr>
+</table></div>
+<div class="two">
+  <figure><img src="img/step2-inside.png" alt="A log in the Voxels view, peeled open halfway to show tree rings inside" width="374" height="598"><figcaption>Changing <b>Inside</b> jumps to the Voxels view, peeled halfway: here a log with Tree rings.</figcaption></figure>
+  <figure><img src="img/step2-cutoff.png" alt="Sheet check showing a mug's sheet with four stray pixels marked, and a message saying four painted pixels were cut off" width="374" height="598"><figcaption>Paint that didn't make it onto the model is marked ⚠ in the list and shown in red.</figcaption></figure>
+</div>
+
+<h3>Cut-off paint (⚠)</h3>
+<p>The model is only solid where all the boxes that can see a spot agree. Paint that the other boxes don't back up is left out, and the row gets a <b>⚠</b> with the number of pixels. <b>Show me</b> points at them. Paint the matching area on the other sides, or erase the extra. A ⚠ row still exports; it's a heads-up, not an error.</p>
+
+<!-- ============================================================ exports -->
+<h2 id="exports" class="m2"><span class="n">⇩</span>Exports</h2>
+<p>Tick the exports you want in the right-hand column; <b>▾ Options</b> opens each one's settings, with a live preview of the selected sheet. One run makes every ticked export for every ready sheet, into the ② output folder (with <b>One folder per model</b>, each model gets its own sub-folder). Files are named after the sheet: <code>rifle.glb</code>, <code>rifle.vox</code>, <code>rifle_isometric.png</code>.</p>
+<div class="table-wrap"><table>
+  <tr><th>Export</th><th>What you get</th></tr>
+  <tr><td>🔺 3D model</td><td>A <code>.glb</code> with its texture (crisp pixels, no blur) for Godot, Unity, Blender and most 3D tools. Size (pixels per metre), pivot point, and optional surface detail: <b>Bumpy surface</b> (a normal map in six styles, with Grit), <b>Crevice shadows</b>, <b>Shiny trims</b>.</td></tr>
+  <tr><td>🧊 Voxel model</td><td>A <code>.vox</code> for MagicaVoxel and other voxel tools, inside included. Over 255 colours: merge similar ones, or skip the file and say so.</td></tr>
+  <tr><td>6 side pictures</td><td>Each side as a PNG, cropped to the model.</td></tr>
+  <tr><td>Rendered sprites</td><td>The model rendered as pixel-art sprite sheets from several angles. Add as many <b>sprite sets</b> as you like, each from a preset (Isometric, Head-on, Side view ¾, Battle view, Oblique view, Inventory icon, Doom-style, RPG Maker MV/MZ, Diablo-style, Classic RTS) or your own settings. <b>Draw from</b> picks the low-poly or the voxel model. The <b>Camera</b> is <b>Flat</b> (sizes stay the same, for tile games), <b>Perspective</b> (a real lens, near parts bigger) or <b>Oblique</b>: your drawing stays flat-on, exactly as drawn, while the depth slants up to one side so the top and one end show, the look of hand-drawn side views like Advance Wars' battle scenes. <b>Picture size</b> goes up to 1024 px, with quick picks from 32 to 1024. <b>⭐ Save as my preset</b> keeps your settings for next time.</td></tr>
+  <tr><td>Sprite stack strip</td><td>One-pixel layers side by side, for "sprite stacking" fake-3D games.</td></tr>
+  <tr><td>Turntable GIF</td><td>A spinning loop of the model, nice for itch.io pages and posts. Camera height, frame count, size.</td></tr>
+  <tr><td>Colour palette</td><td>The model's colours as <code>.gpl</code> (GIMP, Aseprite, Krita) and/or <code>.hex</code>.</td></tr>
+</table></div>
+<figure><img src="img/step2-sprites.png" alt="The Rendered sprites export with an Oblique view sprite set: a preview of the chest seen flat-on from the front with its top and right end showing, above the list of style presets" width="1280" height="720"><figcaption>A sprite set shows the actual pictures it will make, and what the file will be called.</figcaption></figure>
+<p><b>Pixel-perfect look</b> (at the bottom of the exports) applies to rendered sprites and the turntable: 1-pixel outlines, flat or banded lighting, snapping colours to the model's own palette, and a fix for dropped pixels at odd angles.</p>
+
+<!-- ============================================================ lists -->
+<h2 id="lists"><span class="n">☰</span>Lists, selecting and sessions</h2>
+<ul>
+  <li><b>Select like in a file explorer:</b> click a row, <kbd>Shift</kbd>+click for a range, <kbd>Ctrl</kbd>+click to add or remove one, <kbd>Ctrl</kbd>+<kbd>A</kbd> for all, arrow keys to move, <kbd>Esc</kbd> to go back to one row, <kbd>Delete</kbd> to remove.</li>
+  <li><b>Mass edit:</b> with several rows selected, changing a setting on any of them changes all of them. A banner says when that's the case.</li>
+  <li><b>Sessions:</b> 💾 saves both lists and every setting into one <code>.p3d.json</code> file; 📂 opens one. Pictures are stored as paths relative to the session file, so keep them together.</li>
+  <li><b>Autosave:</b> the program saves your work as you go and picks up where you left off, even after a crash. There's no "New": the list is your workspace. To start over, Select all and Remove (in both tabs).</li>
+  <li><b>Live files:</b> sprites and sheets in the lists are read again when you save them in your art program.</li>
+</ul>
+
+<!-- ============================================================ godot -->
+<h2 id="godot"><span class="n">🎮</span>Seeing your models in a game engine</h2>
+<p>The program's Model view is a quick preview. To see models under real lighting, with each surface-detail map switchable, use the <b>godot-preview</b> folder: download Godot 4 (free, no installer), import the folder once, press Play, and drop your exported models on the window or pick their folder. Step-by-step: <a href="../godot-preview/model-preview-in-godot-guide.html">godot-preview/model-preview-in-godot-guide.html</a>.</p>
+
+<!-- ============================================================ cli -->
+<h2 id="cli"><span class="n">⌨</span>The command-line tool</h2>
+<p><code>cli/p3d.mjs</code> does what the two Run buttons do, without the window: a folder of sprites in, sheets and models out, or a saved session run exactly as the program would. It's meant for AI helpers such as Claude and for scripts, so you can say "make models from the sprites in this folder" in another project. It needs <a href="https://nodejs.org">Node.js</a> (version 20 or newer). <a href="../CLI.md">CLI.md</a> explains everything; point your helper at it.</p>
+
+<!-- ============================================================ trouble -->
+<h2 id="trouble"><span class="n">?</span>Troubleshooting</h2>
+<div class="table-wrap"><table>
+  <tr><th>Problem</th><th>What to do</th></tr>
+  <tr><td>"Windows protected your PC"</td><td>The program isn't signed with a paid certificate, so Windows SmartScreen asks first. Click <b>More info</b>, then <b>Run anyway</b>.</td></tr>
+  <tr><td>The window doesn't open</td><td>The program uses Microsoft's WebView2, which comes with Windows 11 and up-to-date Windows 10. If it's missing, install the "Evergreen" WebView2 Runtime from Microsoft.</td></tr>
+  <tr><td>A red ✖ on a row</td><td>Hover it: it says what's wrong and how to fix it (sprite over 128 × 128, a resized or cropped sheet, a fully see-through picture). ✖ rows are skipped.</td></tr>
+  <tr><td>⚠ cut-off paint</td><td>See <a href="#step2">Cut-off paint</a> above, and section 3 of the <a href="paint-a-sheet.html#agree">painting guide</a>.</td></tr>
+  <tr><td>A round thing looks too blocky or too heavy</td><td>Change <b>Round sides</b> (more = rounder, more triangles) and <b>Straighten slopes</b> in ②.</td></tr>
+  <tr><td>The model is upside down or sideways</td><td>Check <b>Sprite shows</b> (① or ②): it decides which way is up and front.</td></tr>
+  <tr><td>Metal looks dark in my game engine</td><td>Metal shows its colour by reflecting the surroundings; give your scene a sky or environment light, or use a non-metal material.</td></tr>
+  <tr><td>Start completely fresh</td><td>Close the program and delete (or rename) its <code>settings</code> folder.</td></tr>
+</table></div>
+
+<footer>
+  <p><b>Made by Reactorcore</b> · <a href="https://linktr.ee/reactorcore">linktr.ee/reactorcore</a></p>
+  <p class="links"><a href="https://reactorcore.itch.io/">itch.io</a><a href="https://www.patreon.com/ReactorcoreGames">Patreon (blog)</a><a href="https://discord.gg/UdRavGhj47">Discord</a><a href="https://reactorcoregames.github.io/">Catalog</a><a href="mailto:reactorcoregames@gmail.com">reactorcoregames@gmail.com</a></p>
+</footer>
+
+</main>
+</body>
+</html>

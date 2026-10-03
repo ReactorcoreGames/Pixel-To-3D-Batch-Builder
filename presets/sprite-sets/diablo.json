@@ -1,0 +1,15 @@
+{
+  "order": 70,
+  "id": "diablo",
+  "name": "Diablo-style",
+  "file": "diablo",
+  "sub": "8 ways · 30° up",
+  "dirs": 8,
+  "start": "front",
+  "elev": 30,
+  "cam": "ortho",
+  "cell": 96,
+  "mirror": false,
+  "pal": "No limit",
+  "tip": "Isometric action-RPG look like Diablo II: 8 directions (16 for heroes) seen from 30° up, matching its 2:1 floor tiles."
+}
