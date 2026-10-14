@@ -1,5 +1,11 @@
 # Pixel to 3D Batch Builder
 
+## DOWNLOAD IT HERE:
+
+https://reactorcore.itch.io/pixel-to-3d-batch-builder
+
+## About
+
 Turn flat pixel-art sprites into 3D models, lots at once. Drop in a folder of sprites (up to 128 × 128 pixels each), tell the program how thick each one is and roughly what shape, and get back low-poly **GLB** models, **MagicaVoxel** `.vox` models and extra 2D art: rendered sprite sheets from any angle, spinning turntable GIFs, side pictures, sprite stacks and palettes. The look is SNES / N64 / PS1, with optional modern touches like normal maps.
 
 ![Pixel to 3D Batch Builder](promo/cover_1280x720.png)
