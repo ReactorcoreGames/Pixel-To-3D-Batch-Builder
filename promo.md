@@ -1,5 +1,14 @@
 # Pixel to 3D Batch Builder: promo kit
 
+Store link + (my basic) discord chat pitch
+```
+If you have pixel art, you can now convert it to 3D/Voxel models with a few clicks.
+https://reactorcore.itch.io/pixel-to-3d-batch-builder
+```
+
+YT video link:
+https://youtu.be/McVfW5ohckE
+
 ## Strategy
 
 ### Who it's for
@@ -130,11 +139,11 @@ Pixel to 3D Batch Builder turns flat pixel-art sprites into low-poly 3D models, 
 [itch.io link]
 
 In this video:
-0:00 Sprites in, models out
-0:15 Step 1: sprites become six-sided sheets
-0:35 Painting a sheet (optional)
-0:50 Step 2: exporting GLB, VOX, sprite sheets and turntables
-1:10 The models in Godot
+0:00 Sprites in, models out (a whole folder at once)
+0:15 Step 1: sprites become six-sided sheets (paint them if you like)
+0:27 Step 2: low-poly GLB and MagicaVoxel VOX models
+0:40 2D sprite sets, turntables and everything one sprite makes
+0:55 Also included: Godot 4 previewer and user guide
 
 What it makes:
 - Low-poly GLB models with crisp pixel textures (Godot, Unity, Blender…)
